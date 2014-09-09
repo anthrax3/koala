@@ -46,6 +46,11 @@ module Koala
           batch_op.to_batch_params(access_token)
         })
 
+        # Set appsecret_proof if app_secret is present in @original_api
+        if @original_api.app_secret
+          args["appsecret_proof"] = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha256"), @original_api.app_secret, @original_api.access_token)
+        end
+
         batch_result = graph_call_outside_batch('/', args, 'post', http_options) do |response|
           unless response
             # Facebook sometimes reportedly returns an empty body at times
